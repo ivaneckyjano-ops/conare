@@ -1,0 +1,5 @@
+# Ignoruj všetko v tomto adresári
+*
+# ale ponechaj tieto súbory pod kontrolou gitu
+!.gitignore
+!README.md

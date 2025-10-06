@@ -1,0 +1,13 @@
+[Unit]
+Description=Saxo token refresher
+After=network.target
+
+[Service]
+User=youruser
+WorkingDirectory=/opt/saxo/Testovanie
+EnvironmentFile=/etc/default/saxo_token
+ExecStart=/opt/saxo/venv/bin/python3 /opt/saxo/Testovanie/token_daemon.py --interval 60 --margin 120
+Restart=on-failure
+
+[Install]
+WantedBy=multi-user.target

@@ -1,0 +1,132 @@
+#Minimálny test OAuth (iba získanie tokenov) Ulož do súboru test_oauth_min.py a doplň svoj CLIENT_ID. Tento script:
+#spustí lokálny HTTP server na 127.0.0.1:8765
+#otvorí prehliadač, počká na callback
+#vymení kód za tokeny a všetko detailne vypíše
+#uloží tokeny do tokens_min.json
+
+#----- test_oauth_min.py -----
+import os, time, json, base64, hashlib, threading, webbrowser
+from http.server import BaseHTTPRequestHandler, HTTPServer
+from urllib.parse import urlencode, urlparse, parse_qs
+import requests
+
+CLIENT_ID = "2d7a66918b594af5bc2ac830a3b79d2c"  # povinne doplň
+CLIENT_SECRET = os.getenv("SAXO_CLIENT_SECRET", "").strip()  # nechaj prázdne, ak nemáš secret
+ENV = "sim"  # alebo "live"
+REDIRECT_URI = "http://127.0.0.1:8765/callback"  # presne takto nech je registrované v app
+
+if ENV == "live":
+AUTH_BASE = "https://live.logonvalidation.net"
+else:
+AUTH_BASE = "https://sim.logonvalidation.net"
+
+AUTH_URL = f"{AUTH_BASE}/authorize"
+TOKEN_URL = f"{AUTH_BASE}/token"
+
+TOKENS_FILE = "tokens_min.json"
+SCOPES = "openid offline_access read trade"
+
+def b64url(data: bytes) -> str:
+return base64.urlsafe_b64encode(data).decode().rstrip("=")
+
+def pkce_pair():
+verifier = b64url(os.urandom(40))
+challenge = b64url(hashlib.sha256(verifier.encode()).digest())
+return verifier, challenge
+
+class Handler(BaseHTTPRequestHandler):
+got = None
+def do_GET(self):
+parsed = urlparse(self.path)
+if parsed.path != urlparse(REDIRECT_URI).path:
+self.send_response(404); self.end_headers(); self.wfile.write(b"Not Found"); return
+params = {k: v[0] for k, v in parse_qs(parsed.query).items()}
+Handler.got = params
+self.send_response(200); self.end_headers()
+self.wfile.write(b"OK, window can be closed.")
+threading.Thread(target=self.server.shutdown, daemon=True).start()
+def log_message(self, *args, **kwargs): pass
+
+def start_server():
+host = urlparse(REDIRECT_URI).hostname or "127.0.0.1"
+port = urlparse(REDIRECT_URI).port or 80
+httpd = HTTPServer((host, port), Handler)
+print(f"Callback server listening on {host}:{port}")
+httpd.serve_forever()
+
+def main():
+if not CLIENT_ID:
+raise SystemExit("Chyba: chýba CLIENT_ID (AppKey).")
+
+use_secret = bool(CLIENT_SECRET)
+verifier = challenge = None
+if not use_secret:
+    verifier, challenge = pkce_pair()
+
+state = b64url(os.urandom(16))
+params = {
+    "response_type": "code",
+    "client_id": CLIENT_ID,
+    "redirect_uri": REDIRECT_URI,
+    "scope": SCOPES,
+    "state": state,
+}
+if not use_secret:
+    params["code_challenge"] = challenge
+    params["code_challenge_method"] = "S256"
+
+url = f"{AUTH_URL}?{urlencode(params)}"
+print("ENV:", ENV)
+print("AUTH_URL:", AUTH_URL)
+print("TOKEN_URL:", TOKEN_URL)
+print("Opening browser:", url)
+
+t = threading.Thread(target=start_server, daemon=True)
+t.start()
+try:
+    webbrowser.open(url)
+except Exception:
+    pass
+
+# čakaj max 180s na callback
+deadline = time.time() + 180
+while Handler.got is None and time.time() < deadline:
+    time.sleep(0.2)
+if Handler.got is None:
+    raise SystemExit("Neprišiel callback. Skontroluj: redirect URI v Saxo app = presne http://127.0.0.1:8765/callback, firewall/port 8765, a či si dokončil login v prehliadači.")
+
+cb = Handler.got
+print("Callback params:", cb)
+if "error" in cb:
+    raise SystemExit(f"OAuth error: {cb.get('error_description') or cb['error']}")
+if cb.get("state") != state:
+    raise SystemExit("State mismatch.")
+
+data = {
+    "grant_type": "authorization_code",
+    "code": cb["code"],
+    "redirect_uri": REDIRECT_URI,
+    "client_id": CLIENT_ID,
+}
+if use_secret:
+    data["client_secret"] = CLIENT_SECRET
+else:
+    data["code_verifier"] = verifier
+
+headers = {"Content-Type": "application/x-www-form-urlencoded", "Accept": "application/json"}
+r = requests.post(TOKEN_URL, data=data, headers=headers, timeout=30)
+print("Token resp status:", r.status_code)
+print("Token resp headers:", dict(r.headers))
+print("Token resp body:", r.text)
+
+if r.status_code != 200:
+    raise SystemExit(f"Token exchange failed: {r.status_code}")
+
+tokens = r.json()
+tokens["obtained_at"] = int(time.time())
+with open(TOKENS_FILE, "w", encoding="utf-8") as f:
+    json.dump(tokens, f, indent=2)
+print(f"Tokens saved to {TOKENS_FILE}")
+if name == "main":
+main()
+----- koniec súboru -----
