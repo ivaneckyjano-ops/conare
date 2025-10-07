@@ -33,7 +33,7 @@ import requests
 CLIENT_ID = os.getenv("SAXO_CLIENT_ID", "TU_DAJ_SVOJ_APPKEY")
 CLIENT_SECRET = os.getenv("SAXO_CLIENT_SECRET", "").strip()
 ENV = "sim"  # demo/sim prostredie
-REDIRECT_URI = "http://127.0.0.1:8765/callback/demo"
+REDIRECT_URI = "http://localhost:8765/callback/demo"
 TOKENS_FILE = "/data/tokens_demo.json"  # pre compose volume
 
 AUTH_BASE = "https://sim.logonvalidation.net"
@@ -58,7 +58,7 @@ class CallbackHandler(BaseHTTPRequestHandler):
             self.send_response(200)
             self.send_header('Content-type', 'text/html')
             self.end_headers()
-            self.wfile.write(b'<html><body><h1>OAuth dokončený!</h1><p>Môžete zatvoriť toto okno.</p></body></html>')
+            self.wfile.write(b'<html><body><h1>OAuth completed!</h1><p>You can close this window.</p></body></html>')
         else:
             self.send_response(404)
             self.end_headers()
@@ -66,7 +66,7 @@ class CallbackHandler(BaseHTTPRequestHandler):
 def start_server():
     global Handler
     Handler = type('Handler', (CallbackHandler,), {'got': None})
-    server = HTTPServer(('127.0.0.1', 8765), Handler)
+    server = HTTPServer(('0.0.0.0', 8765), Handler)
     server.serve_forever()
 
 def b64url(data: bytes) -> str:
