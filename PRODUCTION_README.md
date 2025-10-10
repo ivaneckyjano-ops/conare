@@ -77,21 +77,36 @@ docker-compose -f docker-compose.prod.yml up -d --build
 - ✅ Jednoduchý hedging skript overený (analyzuje ceny cez yfinance, rozhoduje BUY_PUT/CALL)
 - ✅ Docker Compose konfigurácia upravená pre repo súbory
 - ✅ Testovanie s viacerými pozíciami (AAPL, GOOGL)
+- ✅ **Multi-token architektúra implementovaná (NOVÁ ÚPRAVA)**
+  - Oddelené token daemon služby pre demo a live prostredie
+  - Automatické obnovovanie tokenov na pozadí
+  - Token proxy API na portoch 8080 (demo) a 8081 (live)
+  - Paralelný beh demo aj live tokenov bez konfliktu
+  - Úplná docker-compose.prod.yml konfigurácia s 5 službami
 
 ### Neúspechy / Nedokončené
 - ❌ Monitoring dashboard service (chýba v GitHub repo, iba lokálne)
-- ❌ Reálne pripojenie na SaxoTraderGo API
+- ⚠️ **Reálne pripojenie na SaxoTraderGo API (PRIPRAVENÉ NA DOKONČENIE)**
   - OAuth vyžaduje lokálny beh (redirect URI localhost)
-  - Pokusy o lokálny OAuth zlyhali (možno nesprávny CLIENT_SECRET alebo OS issues)
-  - Tokeny nie sú získané
+  - CLIENT_ID a CLIENT_SECRET získané: 2d7a66918b594af5bc2ac830a3b79d2c / 2f5ad858c3eb4ee9b5207d9be5c9c8c5
+  - Multi-token architektúra pripravená na demo aj live tokeny
+  - Zostáva: dokončiť OAuth proces a preniesť tokeny na server
 - ❌ Hedging skript neintegrovaný s Saxo API (iba simulácia)
 - ❌ Žiadne web UI (iba API endpointy)
 
 ### Poznámky
 - Systém funguje pre demo simuláciu bez reálnych API volaní
+- **Multi-token architektúra umožňuje simultánny beh demo aj live prostredí**
 - Pre live trading potrebuje dokončiť OAuth a pridať Saxo API volania do hedging skriptu
 - Positions store je production-ready, hedging logika overená
 - Repo má iba základné súbory, lokálne sú extra (monitoring, hedging-calculator)
+
+## Ďalšie kroky
+1. **Dokončiť OAuth proces lokálne** (demo alebo live prostredie)
+2. **Preniesť získané tokeny na server** do docker-compose služieb
+3. **Spustiť multi-token architektúru** na produkcii
+4. **Integrovať reálne Saxo API volania** do hedging logiky
+5. **Testovať automatické obnovovanie tokenov** na pozadí
 
 ### Ďalšie kroky pre dokončenie
 1. Dokončiť OAuth lokálne, získať tokeny
