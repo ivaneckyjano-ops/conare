@@ -1,12 +1,28 @@
 
 services:
-  # ...
+  # Positions ingestor (reads positions from demo account)
+  positions-ingestor:
+    build:
+      context: /workspaces/conare
+      dockerfile: saxo/Testovanie/Dockerfile
+    container_name: positions-ingestor
+    environment:
+      - PROXY_URL=http://token-proxy-demo:8080/token
+      - STORE_URL=http://positions-store:8090/ingest
+      - INGEST_INTERVAL=60
+    command: sh -c "while true; do python3 /app/saxo/Testovanie/live_read_status.py --proxy \"$$PROXY_URL\" --post-to-store \"$$STORE_URL\" || true; sleep $$INGEST_INTERVAL; done"
+    depends_on:
+      - token-proxy-demo
+      - positions-store
+    restart: unless-stopped
+
+  # Demo token daemon
   saxo-token-daemon-demo:
     build:
-      context: /opt/kb
-      dockerfile: pc/PC/OpenAIGPT/SaxoAPI/Testovanie/Dockerfile
+      context: /workspaces/conare
+      dockerfile: saxo/Testovanie/Dockerfile
     container_name: saxo-token-daemon-demo
-    command: ["python3", "/app/pc/PC/OpenAIGPT/SaxoAPI/Testovanie/token_daemon.py", "--tokens-file", "/data/tokens_demo.json"]
+    command: ["python3", "/app/saxo/Testovanie/token_daemon.py", "--tokens-file", "/data/tokens_demo.json"]
     env_file:
       - .env
     environment:
@@ -15,7 +31,7 @@ services:
       - SAXO_ENV=sim
       - TOKENS_FILE=/data/tokens_demo.json
     volumes:
-      - tokens-demo:/data
+      - ./data:/data
     restart: unless-stopped
 
  # ... 
@@ -53,7 +69,7 @@ services:
       - "8081:8080"
     restart: unless-stopped
 
-  # Live token proxy (exposed on host:8081)
+  # Live token proxy (exposed on host:8083)
   token-proxy-live:
     build:
       context: /opt/kb
@@ -67,7 +83,7 @@ services:
     volumes:
       - tokens-live:/data
     ports:
-      - "8081:8080"
+      - "8083:8080"
     restart: unless-stopped
 
   # Web UI service
@@ -170,22 +186,6 @@ services:
       - "8090:8090"
     restart: unless-stopped
 
-  # Periodic ingestor to push positions into the store automatically
-  positions-ingestor:
-    build:
-      context: /opt/kb
-      dockerfile: pc/PC/OpenAIGPT/SaxoAPI/Testovanie/Dockerfile
-    container_name: positions-ingestor
-    environment:
-      - PROXY_URL=http://token-proxy-live-reader:8080/token
-      - STORE_URL=http://positions-store:8090/ingest
-      - INGEST_INTERVAL=60
-    command: ["sh", "-lc", "while true; do python3 /app/pc/PC/OpenAIGPT/SaxoAPI/Testovanie/live_read_status.py --proxy ${PROXY_URL} --post-to-store ${STORE_URL} || true; sleep ${INGEST_INTERVAL}; done"]
-    depends_on:
-      - token-proxy-live-reader
-      - positions-store
-    restart: unless-stopped
-
   # Token proxy live 0dte
   token-proxy-live-0dte:
     build:
@@ -250,6 +250,42 @@ services:
       - ./data:/data
     depends_on:
       - token-proxy-live-reader
+    restart: unless-stopped
+
+  # Strategy Executor Demo (trading system for demo account)
+  strategy-executor-demo:
+    build:
+      context: /opt/kb
+      dockerfile: pc/HPhome/Dockerfile
+    container_name: strategy-executor-demo
+    env_file:
+      - .env
+    environment:
+      - PROXY_URL=http://token-proxy-demo:8080/token
+      - STORE_URL=http://positions-store:8090
+      - SAXO_ENV=sim
+    command: ["python3", "pc/HPhome/strategy_executor.py"]
+    volumes:
+      - ./data:/data
+      - /opt/kb:/opt/kb:ro
+    depends_on:
+      - token-proxy-demo
+      - positions-store
+    restart: unless-stopped
+
+  # Monitoring Dashboard
+  monitoring-dashboard:
+    build:
+      context: ./monitoring
+      dockerfile: Dockerfile
+    container_name: saxo-monitoring-dashboard
+    environment:
+      - FLASK_ENV=production
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - ./monitoring/monitoring.db:/app/monitoring.db
+    ports:
+      - "8082:8082"
     restart: unless-stopped
 
 volumes:
