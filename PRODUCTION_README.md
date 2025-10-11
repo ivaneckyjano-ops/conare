@@ -83,6 +83,13 @@ docker-compose -f docker-compose.prod.yml up -d --build
   - Token proxy API na portoch 8080 (demo) a 8081 (live)
   - Paralelný beh demo aj live tokenov bez konfliktu
   - Úplná docker-compose.prod.yml konfigurácia s 5 službami
+- ✅ **🚀 SAXO DEMO TRADER PRIPOJENÝ K REÁLNEMU API! (2025-10-11)**
+  - Plne funkčný Saxo Demo Trader (`saxo_demo_trader.py`)
+  - Pripojený k demo účtu: **Ján Ivanecký** (Cash: 999,335.41 €)
+  - Automatické čítanie pozícií, balance a market data
+  - Hedging stratégia implementovaná (PUT opcie pre equity hedge)
+  - Token management cez production token-proxy
+  - Real-time monitoring každých 30 sekúnd
 
 ### Neúspechy / Nedokončené
 - ❌ Monitoring dashboard service (chýba v GitHub repo, iba lokálne)
@@ -139,5 +146,14 @@ Poznámka: authorization code je jednorazový — ak bol použitý/expedovaný, 
 - ✅ **HOTOVO:** Token súbor skopírovaný do kontajnera `saxo-token-demo`
 - ✅ **HOTOVO:** Token-proxy funguje na http://91.98.81.44:8080/token
 - ✅ **ÚSPECH:** Multi-token architektúra je plne funkčná na produkcii!
+- ✅ **NOVÝ MÍĽNIK:** Saxo Demo Trader pripojený k reálnemu Saxo API!
+
+**Saxo Demo Trader - FUNKČNÝ:**
+- 🔗 Pripojený ako: **Ján Ivanecký** (Saxo demo účet)
+- 💰 Cash Balance: **999,335.41 €**
+- 📊 Pozície: **1 aktívna pozícia**
+- 🔄 Automatické čítanie pozícií každých 30 sekúnd
+- 🛡️ Hedging stratégia pripravená (zatiaľ žiadny hedge nepotrebný)
+- 📍 Spúšťa sa: `python3 /workspaces/conare/saxo/saxo_demo_trader.py`
 
 **Endpoint:** `curl http://91.98.81.44:8080/token` vracia platný `access_token`
