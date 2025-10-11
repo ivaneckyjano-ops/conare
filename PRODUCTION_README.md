@@ -107,6 +107,13 @@ docker-compose -f docker-compose.prod.yml up -d --build
 3. **Spustiť multi-token architektúru** na produkcii
 4. **Integrovať reálne Saxo API volania** do hedging logiky
 5. **Testovať automatické obnovovanie tokenov** na pozadí
+### Priebeh a prestávka
+ - Dátum: 2025-10-11
+ - Stav: Pracovná relácia prerušena (prestávka s deťmi). Všetky zmeny boli uložené na serveri a do GitHub repozitára.
+ - Čo je hotové: docker-compose nasadenie spustené, všetky služby postavené a spustené.
+ - Nasledujúci krok: dokončiť OAuth flow (lokálne) po návrate.
+
+
 
 ### Ďalšie kroky pre dokončenie
 1. Dokončiť OAuth lokálne, získať tokeny
