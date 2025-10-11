@@ -121,3 +121,23 @@ docker-compose -f docker-compose.prod.yml up -d --build
 3. Upraviť hedging skript na volanie Saxo API (place orders)
 4. Pridať monitoring dashboard (commitnúť do repo)
 5. Testovať live trading s malými objemami
+### Dnešné aktivity (2025-10-11, poobedie)
+
+- Vymenil sa demo authorization code za tokeny lokálne.
+  - Tokeny boli uložené lokálne do súboru: `saxo/Testovanie/data/tokens_demo.json`.
+- Token-daemon a token-proxy sú pripravené v produkčnom compose, ale tokeny ešte neboli skopírované do produkčného volume.
+- Nasledujúci krok (teraz): skopírovať `tokens_demo.json` na server a vložiť ho do kontajnera `saxo-token-demo` (tým sa tokeny sprístupnia cez token-proxy na porte 8080).
+
+Stav po kroku: tokeny uložené lokálne; čaká sa na presun na server a overenie v bežiacom kontajneri.
+
+Poznámka: authorization code je jednorazový — ak bol použitý/expedovaný, treba vygenerovať nový.
+
+**OAuth demo tokeny získané (2025-10-11 popoludnie):**
+- ✅ Úspešne vymenil authorization code za demo tokeny
+- ✅ Tokeny uložené lokálne: `saxo/Testovanie/data/tokens_demo.json`
+- ✅ Token súbor nahraný do GitHub repozitára: `saxo/Testovanie/tokens_demo.json`
+- ✅ **HOTOVO:** Token súbor skopírovaný do kontajnera `saxo-token-demo`
+- ✅ **HOTOVO:** Token-proxy funguje na http://91.98.81.44:8080/token
+- ✅ **ÚSPECH:** Multi-token architektúra je plne funkčná na produkcii!
+
+**Endpoint:** `curl http://91.98.81.44:8080/token` vracia platný `access_token`
