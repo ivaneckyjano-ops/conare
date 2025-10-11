@@ -1,0 +1,9 @@
+{
+  "access_token": "eyJhbGciOiJFUzI1NiIsIng1dCI6IjY3NEM0MjFEMzZEMUE1OUNFNjFBRTIzMjMyOTVFRTAyRTc3MDMzNTkifQ.eyJvYWEiOiI3Nzc3MCIsImlzcyI6Im9hIiwiYWlkIjoiNjkzMyIsInVpZCI6Im18MDRJSlhqYS1vWDhsc3lQS2cxOWc9PSIsImNpZCI6Im18MDRJSlhqYS1vWDhsc3lQS2cxOWc9PSIsImlzYSI6IkZhbHNlIiwidGlkIjoiMTE5NjAiLCJzaWQiOiIyZmJlYjM0N2I1NzQ0Yjk2YWJkOTUzNTM0MWU1MjYyNyIsImRnaSI6Ijg0IiwiZXhwIjoiMTc2MDE5MjM5NCIsIm9hbCI6IjFGIiwiaWlkIjoiMjdhOTY3ZmRkZTJhNGE1YmYzZDIwOGRkZTc4MDA0MzMifQ.JGbrehr59eGGru-HiZlQHShtRqLxjYnaX6PSj65tyTB59y2M1Wl69tGTtpOmX2XtddRwGSsdDd4ViK0RNFUvlw",
+  "token_type": "Bearer",
+  "expires_in": 1138,
+  "refresh_token": "d77318b9-4ae4-4ca7-956d-46372eb72d97",
+  "refresh_token_expires_in": 3538,
+  "base_uri": null,
+  "obtained_at": 1760191256
+}
